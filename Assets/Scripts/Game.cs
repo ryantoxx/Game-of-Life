@@ -12,6 +12,8 @@ public class Game : MonoBehaviour
     private float timer = 0;
 
     public bool simulationEnabled = false;
+    
+    public int numGenerations = 100; //by default
 
 
     Cell[,] grid = new Cell[SCREEN_WIDTH, SCREEN_HEIGHT];
@@ -29,11 +31,18 @@ public class Game : MonoBehaviour
         {
             if (timer >= speed)
             {
+                if (numGenerations <= 0)
+                {
+                    return;
+                }
+                
                 timer = 0f;
 
                 CountNeighbours();
 
                 PopulationControl(); 
+                
+                numGenerations--;
             }
             else
             {
