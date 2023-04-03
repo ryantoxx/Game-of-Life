@@ -45,7 +45,10 @@ public class Game : MonoBehaviour
 
                 PopulationControl(); 
 
-                ChaosRule();
+                if (chaosRule)
+                {
+                    ChaosRule();
+                }
                 
                 numGenerations--;
             }
@@ -97,7 +100,7 @@ public class Game : MonoBehaviour
             {
                 Cell cell = Instantiate(Resources.Load("Prefabs/Cell", typeof(Cell)), new Vector2(x, y), Quaternion.identity) as Cell;
                 grid[x, y] = cell;
-                grid[x, y].SetAlive (RandomAliveCell());
+                grid[x, y].SetAlive(false);
             }
         }
     }
@@ -245,9 +248,9 @@ public class Game : MonoBehaviour
 
     bool RandomAliveCell ()
     {
-        int rand = UnityEngine.Random.Range (0, 100);
+        int rand = UnityEngine.Random.Range(0, 100);
 
-        if (rand > 80)
+        if (rand > 75)
         {
             return true;
         }
