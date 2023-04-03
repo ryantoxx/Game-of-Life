@@ -12,8 +12,11 @@ public class Game : MonoBehaviour
     private float timer = 0;
 
     public bool simulationEnabled = false;
-    
-    public int numGenerations = 100; //by default
+
+    public bool chaosRule = false; 
+    public float chaosProbability = 0.05f; //small value 5%
+
+    public int numGenerations = 100;
 
 
     Cell[,] grid = new Cell[SCREEN_WIDTH, SCREEN_HEIGHT];
@@ -41,6 +44,8 @@ public class Game : MonoBehaviour
                 CountNeighbours();
 
                 PopulationControl(); 
+
+                ChaosRule();
                 
                 numGenerations--;
             }
@@ -217,15 +222,32 @@ public class Game : MonoBehaviour
                 {
                     cell.SetAlive(true);
                 }
+
             }
         }
+    }
+
+    void ChaosRule() 
+    {
+        for (int y = 0; y < SCREEN_HEIGHT; y++)
+        {
+            for (int x = 0; x < SCREEN_WIDTH; x++)
+            {           
+                Cell cell = grid[x, y];
+
+                if (Random.value < chaosProbability)
+                {
+                    cell.SetAlive(!cell.isAlive);
+                }
+            }
+        }      
     }
 
     bool RandomAliveCell ()
     {
         int rand = UnityEngine.Random.Range (0, 100);
 
-        if (rand > 75)
+        if (rand > 80)
         {
             return true;
         }
