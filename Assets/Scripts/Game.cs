@@ -16,6 +16,12 @@ public class Game : MonoBehaviour
     public bool chaosRule = false; 
     public float chaosProbability = 0.05f; //small value 5%
 
+    public bool randomBirths = false;
+    public float birthProbability = 0.1f;
+
+    public bool randomPattern = false;
+    public bool pattern1 = false;
+
     public int numGenerations = 100;
 
 
@@ -25,6 +31,14 @@ public class Game : MonoBehaviour
     void Start()
     {
         PlaceCells();
+        if (randomPattern)
+        {
+            RandomConfiguration();
+        }
+        else if (pattern1)
+        {
+            Configuration1();
+        }
     }
 
     // Update is called once per frame
@@ -194,6 +208,15 @@ public class Game : MonoBehaviour
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
             {
+                // Get the current cell
+                Cell cell = grid[x, y];
+
+                // New Rule: Check Random Birth
+                if (cell.isAlive && randomBirths && Random.value <= birthProbability)
+                {
+                    RandomBirths(x, y);
+                }
+
                 /*
                     Basic Rules: 
                         1. A living cell with two or three living neighbors survives to the next generation;
@@ -201,8 +224,6 @@ public class Game : MonoBehaviour
                         3. A living cell with more than three living neighbors dies from overpopulation;
                         4. A dead cell with exactly three living neighbors becomes a living cell by reproduction.
                 */
-                // Get the current cell
-                Cell cell = grid[x, y];
 
                 // Rule 1: A living cell with two or three living neighbors survives to the next generation
                 if (cell.isAlive && (cell.numNeighbours == 2 || cell.numNeighbours == 3))
@@ -225,7 +246,6 @@ public class Game : MonoBehaviour
                 {
                     cell.SetAlive(true);
                 }
-
             }
         }
     }
@@ -246,15 +266,53 @@ public class Game : MonoBehaviour
         }      
     }
 
-    bool RandomAliveCell ()
+    void RandomBirths(int x, int y)
     {
-        int rand = UnityEngine.Random.Range(0, 100);
+        int numBirths = UnityEngine.Random.Range(1, 3);
 
-        if (rand > 75)
+        for (int i = 1; i <= numBirths; i++)
         {
-            return true;
-        }
+            int posX = UnityEngine.Random.Range(-1, 2);
+            int posY = UnityEngine.Random.Range(-1, 2);
 
-        return false;
+            if (x > 0 && x < (SCREEN_WIDTH - 1) && y > 0 && y < (SCREEN_HEIGHT - 1))
+            {
+                grid[x + posX, y + posY].SetAlive(true);
+            } 
+        }
+    }
+
+    void RandomConfiguration()
+    {
+        for (int y = 0; y < SCREEN_HEIGHT; y++)
+        {
+            for (int x = 0; x < SCREEN_WIDTH; x++)
+            {           
+                Cell cell = grid[x, y];
+
+                if (Random.value > 0.75f)
+                {
+                    cell.SetAlive(true);
+                }
+            }
+        }   
+    }
+
+    void Configuration1()
+    {
+        int x = SCREEN_WIDTH/2 - 5;
+        int y = SCREEN_HEIGHT/2;
+        grid[x, y].SetAlive(true);
+        grid[x+1, y].SetAlive(true);
+        grid[x+2, y-1].SetAlive(true);
+        grid[x+2, y+1].SetAlive(true);
+        grid[x+3, y].SetAlive(true);
+        grid[x+4, y].SetAlive(true);
+        grid[x+5, y].SetAlive(true);
+        grid[x+6, y].SetAlive(true);
+        grid[x+7, y-1].SetAlive(true);
+        grid[x+7, y+1].SetAlive(true);
+        grid[x+8, y].SetAlive(true);
+        grid[x+9, y].SetAlive(true);
     }
 }
