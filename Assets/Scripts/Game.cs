@@ -22,7 +22,8 @@ public class Game : MonoBehaviour
 
     private bool times = true;
     public bool randomPattern = false;
-    public bool pattern1 = false;
+    public bool reflector = false;
+    public bool gliderGun = false;
 
     public int numGenerations = 100;
 
@@ -77,10 +78,15 @@ public class Game : MonoBehaviour
             RandomConfiguration();
             times = false;
         }
-        else if (pattern1 && !StartSimulation)
+        else if (reflector && !StartSimulation)
         {
             ClearGrid();
-            Configuration1();
+            Reflector();
+        }
+        else if (gliderGun && !StartSimulation)
+        {
+            ClearGrid();
+            GliderGun();
         }
 
         if (clearGrid)
@@ -326,7 +332,7 @@ public class Game : MonoBehaviour
         }   
     }
 
-    void Configuration1()
+    void Reflector()
     {
         int x = SCREEN_WIDTH/2 - 5;
         int y = SCREEN_HEIGHT/2;
@@ -342,5 +348,50 @@ public class Game : MonoBehaviour
         grid[x+7, y+1].SetAlive(true);
         grid[x+8, y].SetAlive(true);
         grid[x+9, y].SetAlive(true);
+    }
+
+    void GliderGun()
+    {
+        int x = 0;
+        int y = 30;
+        grid[x+1, y+5].SetAlive(true);
+        grid[x+2, y+5].SetAlive(true);
+        grid[x+1, y+6].SetAlive(true);
+        grid[x+2, y+6].SetAlive(true);
+
+        grid[x+11, y+5].SetAlive(true);
+        grid[x+11, y+6].SetAlive(true);
+        grid[x+11, y+7].SetAlive(true);
+        grid[x+12, y+4].SetAlive(true);
+        grid[x+12, y+8].SetAlive(true);
+        grid[x+13, y+3].SetAlive(true);
+        grid[x+14, y+3].SetAlive(true);
+        grid[x+13, y+9].SetAlive(true);
+        grid[x+14, y+9].SetAlive(true);
+        grid[x+15, y+6].SetAlive(true);
+        grid[x+16, y+4].SetAlive(true);
+        grid[x+16, y+8].SetAlive(true);
+        grid[x+17, y+5].SetAlive(true);
+        grid[x+17, y+6].SetAlive(true);
+        grid[x+17, y+7].SetAlive(true);
+        grid[x+18, y+6].SetAlive(true);
+
+        grid[x+21, y+7].SetAlive(true);
+        grid[x+22, y+7].SetAlive(true);
+        grid[x+21, y+8].SetAlive(true);
+        grid[x+22, y+8].SetAlive(true);
+        grid[x+21, y+9].SetAlive(true);
+        grid[x+22, y+9].SetAlive(true);
+        grid[x+23, y+6].SetAlive(true);
+        grid[x+23, y+10].SetAlive(true);
+        grid[x+25, y+5].SetAlive(true);
+        grid[x+25, y+6].SetAlive(true);
+        grid[x+25, y+10].SetAlive(true);
+        grid[x+25, y+11].SetAlive(true);
+
+        grid[x+35, y+8].SetAlive(true);
+        grid[x+36, y+8].SetAlive(true);
+        grid[x+35, y+9].SetAlive(true);
+        grid[x+36, y+9].SetAlive(true);
     }
 }
