@@ -27,6 +27,8 @@ public class Game : MonoBehaviour
 
     public int numGenerations = 100;
 
+    public bool uniRule = false;
+
 
     Cell[,] grid = new Cell[SCREEN_WIDTH, SCREEN_HEIGHT];
 
@@ -229,6 +231,7 @@ public class Game : MonoBehaviour
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
             {
+
                 /*
                     Basic Rules: 
                         1. A living cell with two or three living neighbors survives to the next generation;
@@ -239,10 +242,17 @@ public class Game : MonoBehaviour
                 // Get the current cell
                 Cell cell = grid[x, y];
 
-                if (cell.isAlive && randomBirthsRule && Random.value <= birthProbability)
+                if (cell.isAlive && uniRule)
+                {
+                    UniReproduction();
+                }
+
+                else if (cell.isAlive && randomBirthsRule && Random.value <= birthProbability)
                 {
                     RandomBirths(x, y);
                 }
+
+            
 
                 // Rule 1: A living cell with two or three living neighbors survives to the next generation
                 else if (cell.isAlive && (cell.numNeighbours == 2 || cell.numNeighbours == 3))
@@ -332,6 +342,51 @@ public class Game : MonoBehaviour
         }   
     }
 
+        Cell RandomNeighbour(int x, int y)
+    {
+        int xoffset = 0;
+        int yoffset = 0;
+        while((xoffset == 0) && (yoffset == 0)){
+            xoffset = Random.Range(-1, 1);
+            yoffset = Random.Range(-1, 1);
+        }
+        if(xoffset + x < 0 || xoffset+x > SCREEN_WIDTH || yoffset+y < 0 || yoffset+y >SCREEN_HEIGHT){
+            Cell cell = grid[x,y];
+             return cell;
+        }else{
+            Cell cell = grid[x+xoffset,y+yoffset];
+             return cell;
+        }
+        
+       
+    }
+
+    void UniReproduction() 
+    {
+        for (int y = 0; y < SCREEN_HEIGHT; y++)
+        {
+            for (int x = 0; x < SCREEN_WIDTH; x++)
+            {           
+                Cell cell = grid[x, y];
+
+                
+
+                
+                if (cell.isAlive && (cell.numNeighbours == 0))
+                {
+                    int number = Random.Range(1,4);
+                    if( number == 3){
+                        Cell neighbour1 = RandomNeighbour(x,y);
+                        Cell neighbour2 = RandomNeighbour(x,y);
+                        neighbour1.SetAlive(true);
+                        neighbour2.SetAlive(true);
+                        
+                    }
+                }
+            }
+        }      
+    }
+
     void Reflector()
     {
         int x = SCREEN_WIDTH/2 - 5;
@@ -394,4 +449,5 @@ public class Game : MonoBehaviour
         grid[x+35, y+9].SetAlive(true);
         grid[x+36, y+9].SetAlive(true);
     }
+
 }
