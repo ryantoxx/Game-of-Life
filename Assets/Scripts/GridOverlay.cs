@@ -92,6 +92,29 @@ public class GridOverlay : MonoBehaviour
             }
         }
 
+
+        GL.Color(Color.red);
+
+        // Horizontal lines
+        GL.Vertex3(startX + 0, startY + 0, startZ);
+        GL.Vertex3(startX + 64, startY + 0, startZ);
+
+        GL.Vertex3(startX + 64, startY + 0, startZ);
+        GL.Vertex3(startX + 64, startY + 16, startZ);
+
+        GL.Vertex3(startX + 64, startY + 16, startZ);
+        GL.Vertex3(startX + 0, startY + 16, startZ);
+
+        GL.Vertex3(startX + 0, startY + 16, startZ);
+        GL.Vertex3(startX + 0, startY + 0, startZ);
+
+        // Vertical lines
+        GL.Vertex3(startX + 0, startY + 0, startZ);
+        GL.Vertex3(startX + 0, startY + 16, startZ);
+
+        GL.Vertex3(startX + 64, startY + 0, startZ);
+        GL.Vertex3(startX + 64, startY + 16, startZ);
+
         GL.End();
     }
 }
