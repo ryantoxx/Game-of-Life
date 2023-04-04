@@ -12,6 +12,7 @@ public class Game : MonoBehaviour
     private float timer = 0;
 
     public bool StartSimulation = false;
+    public bool clearGrid = false;
 
     public bool StartChaosZone = false; 
     public float chaosProbability = 0.05f; //small value 5%
@@ -19,6 +20,7 @@ public class Game : MonoBehaviour
     public bool randomBirthsRule = false;
     public float birthProbability = 0.1f;
 
+    private bool times = true;
     public bool randomPattern = false;
     public bool pattern1 = false;
 
@@ -31,15 +33,6 @@ public class Game : MonoBehaviour
     void Start()
     {
         PlaceCells();
-
-        if (randomPattern)
-        {
-            RandomConfiguration();
-        }
-        else if (pattern1)
-        {
-            Configuration1();
-        }
     }
 
     // Update is called once per frame
@@ -73,6 +66,27 @@ public class Game : MonoBehaviour
                 timer += Time.deltaTime;
             }
         }
+
+        if (!randomPattern)
+        {
+            times = true;
+        }
+        if (randomPattern && !StartSimulation && times)
+        {
+            ClearGrid();
+            RandomConfiguration();
+            times = false;
+        }
+        else if (pattern1 && !StartSimulation)
+        {
+            ClearGrid();
+            Configuration1();
+        }
+
+        if (clearGrid)
+        {
+            ClearGrid();
+        } 
 
         UserInput();
     }
@@ -250,7 +264,6 @@ public class Game : MonoBehaviour
         }
     }
 
-
     void ChaosZone() 
     {
         for (int y = 0; y < SCREEN_HEIGHT; y++)
@@ -269,19 +282,7 @@ public class Game : MonoBehaviour
             }
         }      
     }
-/*
-    bool RandomAliveCell ()
-    {
-        int rand = UnityEngine.Random.Range(0, 100);
 
-        if (rand > 75)
-        {
-            return true;
-        }
-
-        return false;
-    }
-*/
     void RandomBirths(int x, int y)
     {
         int numBirths = UnityEngine.Random.Range(1, 3);
@@ -296,6 +297,17 @@ public class Game : MonoBehaviour
                 grid[x + posX, y + posY].SetAlive(true);
             } 
         }
+    }
+
+    void ClearGrid()
+    {
+        for (int y = 0; y < SCREEN_HEIGHT; y++)
+        {
+            for (int x = 0; x < SCREEN_WIDTH; x++)
+            {           
+                grid[x, y].SetAlive(false);
+            }
+        } 
     }
 
     void RandomConfiguration()
