@@ -11,12 +11,12 @@ public class Game : MonoBehaviour
     public float speed = 0.1f;
     private float timer = 0;
 
-    public bool simulationEnabled = false;
+    public bool StartSimulation = false;
 
-    public bool chaosRule = false; 
+    public bool StartChaosZone = false; 
     public float chaosProbability = 0.05f; //small value 5%
 
-    public bool randomBirths = false;
+    public bool randomBirthsRule = false;
     public float birthProbability = 0.1f;
 
     public bool randomPattern = false;
@@ -31,6 +31,7 @@ public class Game : MonoBehaviour
     void Start()
     {
         PlaceCells();
+
         if (randomPattern)
         {
             RandomConfiguration();
@@ -44,7 +45,7 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (simulationEnabled)
+        if (StartSimulation)
         {
             if (timer >= speed)
             {
@@ -57,11 +58,11 @@ public class Game : MonoBehaviour
 
                 CountNeighbours();
 
-                PopulationControl(); 
+                PopulationControl();    
 
-                if (chaosRule)
+                if (StartChaosZone)
                 {
-                    ChaosRule();
+                    ChaosZone();
                 }
                 
                 numGenerations--;
@@ -95,14 +96,14 @@ public class Game : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.P))
         {
             // Pause Simulation
-            simulationEnabled = false;
+            StartSimulation = false;
 
         }
 
         if (Input.GetKeyUp(KeyCode.B))
         {
             // Resume Simulation
-            simulationEnabled = true;
+            StartSimulation = true;
         }
     }
 
@@ -208,15 +209,6 @@ public class Game : MonoBehaviour
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
             {
-                // Get the current cell
-                Cell cell = grid[x, y];
-
-                // New Rule: Check Random Birth
-                if (cell.isAlive && randomBirths && Random.value <= birthProbability)
-                {
-                    RandomBirths(x, y);
-                }
-
                 /*
                     Basic Rules: 
                         1. A living cell with two or three living neighbors survives to the next generation;
@@ -224,9 +216,16 @@ public class Game : MonoBehaviour
                         3. A living cell with more than three living neighbors dies from overpopulation;
                         4. A dead cell with exactly three living neighbors becomes a living cell by reproduction.
                 */
+                // Get the current cell
+                Cell cell = grid[x, y];
+
+                if (cell.isAlive && randomBirthsRule && Random.value <= birthProbability)
+                {
+                    RandomBirths(x, y);
+                }
 
                 // Rule 1: A living cell with two or three living neighbors survives to the next generation
-                if (cell.isAlive && (cell.numNeighbours == 2 || cell.numNeighbours == 3))
+                else if (cell.isAlive && (cell.numNeighbours == 2 || cell.numNeighbours == 3))
                 {
                     // Cell stays alive
                     cell.SetAlive(true);
@@ -246,26 +245,43 @@ public class Game : MonoBehaviour
                 {
                     cell.SetAlive(true);
                 }
+
             }
         }
     }
 
-    void ChaosRule() 
+
+    void ChaosZone() 
     {
         for (int y = 0; y < SCREEN_HEIGHT; y++)
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
-            {           
+            {   
                 Cell cell = grid[x, y];
 
-                if (Random.value < chaosProbability)
+                if (x >= 0 && x <= 64 && y >= 0 && y <= 12)
                 {
-                    cell.SetAlive(!cell.isAlive);
+                    if (Random.value < chaosProbability)
+                    {
+                        cell.SetAlive(!cell.isAlive);
+                    }
                 }
             }
         }      
     }
+/*
+    bool RandomAliveCell ()
+    {
+        int rand = UnityEngine.Random.Range(0, 100);
 
+        if (rand > 75)
+        {
+            return true;
+        }
+
+        return false;
+    }
+*/
     void RandomBirths(int x, int y)
     {
         int numBirths = UnityEngine.Random.Range(1, 3);
