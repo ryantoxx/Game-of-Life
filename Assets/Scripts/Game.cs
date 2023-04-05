@@ -29,7 +29,7 @@ public class Game : MonoBehaviour
 
     public bool uniRule = false;
 
-    //Canvas mainMenuCanvas;
+    Canvas mainMenuCanvas;
     InputField numGen;
     Slider speedSlider, chaosSlider, birthSlider;
     Text speedText, chaosText, birthText;
