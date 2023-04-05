@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
@@ -15,20 +16,28 @@ public class Game : MonoBehaviour
     public bool clearGrid = false;
 
     public bool StartChaosZone = false; 
-    public float chaosProbability = 0.05f; //small value 5%
+    public float chaosProbability = 0;
 
     public bool randomBirthsRule = false;
-    public float birthProbability = 0.1f;
+    public float birthProbability = 0;
 
-    private bool times = true;
     public bool randomPattern = false;
     public bool reflector = false;
     public bool gliderGun = false;
 
-    public int numGenerations = 100;
+    public int numGenerations = 1000;
 
     public bool uniRule = false;
 
+    //Canvas mainMenuCanvas;
+    InputField numGen;
+    Slider speedSlider, chaosSlider, birthSlider;
+    Text speedText, chaosText, birthText;
+    Toggle toggle, uniToggle, birthToggle;
+    Button startButton, stopButton, clearButton;
+    Button randomButton, reflectorButton, gunButton;
+    bool inMainMenu = false;
+    bool currentState = false;
 
     Cell[,] grid = new Cell[SCREEN_WIDTH, SCREEN_HEIGHT];
 
@@ -36,6 +45,55 @@ public class Game : MonoBehaviour
     void Start()
     {
         PlaceCells();
+        mainMenuCanvas = GameObject.Find("MainMenu").GetComponent<Canvas>();
+
+        //Sliders
+        speedSlider = GameObject.Find("Slider").GetComponent<Slider>();
+        speedText = GameObject.Find("SliderSpeedText").GetComponent<Text>();
+        chaosSlider = GameObject.Find("SliderChaos").GetComponent<Slider>();
+        chaosText = GameObject.Find("SliderTextChaos").GetComponent<Text>();
+        birthSlider = GameObject.Find("SliderBirth").GetComponent<Slider>();
+        birthText = GameObject.Find("SliderTextBirth").GetComponent<Text>();
+
+        //Toggle
+        toggle = GameObject.Find("ToggleChaos").GetComponent<Toggle>();
+        uniToggle = GameObject.Find("ToggleUni").GetComponent<Toggle>();
+        birthToggle = GameObject.Find("ToggleBirth").GetComponent<Toggle>();
+
+        //Buttons
+        startButton = GameObject.Find("StartSim").GetComponent<Button>();
+        startButton.onClick.AddListener(OnButtonClickStart);
+        stopButton = GameObject.Find("StopSim").GetComponent<Button>();
+        stopButton.onClick.AddListener(OnButtonClickStop);
+        clearButton = GameObject.Find("ClearSim").GetComponent<Button>();
+        clearButton.onClick.AddListener(OnButtonClickClear);
+
+        randomButton =  GameObject.Find("ButtonRandom").GetComponent<Button>();
+        randomButton.onClick.AddListener(OnButtonClickRandom);
+        reflectorButton =  GameObject.Find("ButtonReflector").GetComponent<Button>();
+        reflectorButton.onClick.AddListener(OnButtonClickReflector);
+        gunButton =  GameObject.Find("ButtonGun").GetComponent<Button>();
+        gunButton.onClick.AddListener(OnButtonClickGun);
+
+        //Input Field
+        numGen = GameObject.Find("InputNum").GetComponent<InputField>();
+        numGen.onEndEdit.AddListener(OnEndEdit);
+
+        toggle.onValueChanged.AddListener(delegate {
+            ToggleValueChanged(toggle);
+        });
+
+        uniToggle.onValueChanged.AddListener(delegate {
+            ToggleValueChanged(uniToggle);
+        });
+
+        birthToggle.onValueChanged.AddListener(delegate {
+            ToggleValueChanged(birthToggle);
+        });
+        speedText.text = "Speed: "+ speedSlider.value.ToString("F2");
+        chaosText.text = "Probability: "+ chaosSlider.value.ToString("F2");
+        birthText.text = "Probability: "+ birthSlider.value.ToString("F2");
+        mainMenuCanvas.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -53,13 +111,11 @@ public class Game : MonoBehaviour
                 timer = 0f;
 
                 CountNeighbours();
-
-                PopulationControl();    
-
                 if (StartChaosZone)
                 {
                     ChaosZone();
                 }
+                PopulationControl();    
                 
                 numGenerations--;
             }
@@ -70,38 +126,23 @@ public class Game : MonoBehaviour
             }
         }
 
-        if (!randomPattern)
+        if (StartChaosZone && StartSimulation)
         {
-            times = true;
+            ChaosZone();
         }
-        if (randomPattern && !StartSimulation && times)
-        {
-            ClearGrid();
-            RandomConfiguration();
-            times = false;
-        }
-        else if (reflector && !StartSimulation)
-        {
-            ClearGrid();
-            Reflector();
-        }
-        else if (gliderGun && !StartSimulation)
-        {
-            ClearGrid();
-            GliderGun();
-        }
-
-        if (clearGrid)
-        {
-            ClearGrid();
-        } 
 
         UserInput();
+        speed = speedSlider.value;
+        chaosProbability = chaosSlider.value;
+        birthProbability = birthSlider.value;
+        speedText.text = "Speed: "+ speedSlider.value.ToString("F2");
+        chaosText.text = "Probability: "+ chaosSlider.value.ToString("F2");
+        birthText.text = "Probability: "+ birthSlider.value.ToString("F2");
     }
 
     void UserInput()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && inMainMenu == false)
         {
             Vector2 mousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -115,18 +156,39 @@ public class Game : MonoBehaviour
             } 
         }
 
-        if (Input.GetKeyUp(KeyCode.P))
+        if (Input.GetKeyUp(KeyCode.P) && inMainMenu == false)
         {
             // Pause Simulation
             StartSimulation = false;
 
         }
 
-        if (Input.GetKeyUp(KeyCode.B))
+        if (Input.GetKeyUp(KeyCode.B) && inMainMenu == false)
         {
             // Resume Simulation
             StartSimulation = true;
         }
+        /*
+        if(Input.GetKeyUp(KeyCode.Escape))
+        {
+            if(inMainMenu == false)
+            {
+                currentState = StartSimulation;
+                inMainMenu = true;
+                StartSimulation = false;
+                mainMenuCanvas.gameObject.SetActive(true);
+            }
+            else
+            {
+                inMainMenu = false;
+                StartSimulation = currentState;
+                speed = speedSlider.value;
+                chaosProbability = chaosSlider.value;
+                birthProbability = birthSlider.value;
+                mainMenuCanvas.gameObject.SetActive(false);
+            }
+        }
+        */
     }
 
     void PlaceCells ()
@@ -242,17 +304,15 @@ public class Game : MonoBehaviour
                 // Get the current cell
                 Cell cell = grid[x, y];
 
+                // uni Rule
                 if (cell.isAlive && uniRule)
                 {
                     UniReproduction();
                 }
-
                 else if (cell.isAlive && randomBirthsRule && Random.value <= birthProbability)
                 {
                     RandomBirths(x, y);
                 }
-
-            
 
                 // Rule 1: A living cell with two or three living neighbors survives to the next generation
                 else if (cell.isAlive && (cell.numNeighbours == 2 || cell.numNeighbours == 3))
@@ -282,6 +342,7 @@ public class Game : MonoBehaviour
 
     void ChaosZone() 
     {
+        float prob = chaosProbability / 200;
         for (int y = 0; y < SCREEN_HEIGHT; y++)
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
@@ -290,7 +351,7 @@ public class Game : MonoBehaviour
 
                 if (x >= 0 && x <= 64 && y >= 0 && y <= 12)
                 {
-                    if (Random.value < chaosProbability)
+                    if (Random.value < prob)
                     {
                         cell.SetAlive(!cell.isAlive);
                     }
@@ -315,7 +376,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    void ClearGrid()
+    public void ClearGrid()
     {
         for (int y = 0; y < SCREEN_HEIGHT; y++)
         {
@@ -325,6 +386,115 @@ public class Game : MonoBehaviour
             }
         } 
     }
+
+    void ToggleValueChanged(Toggle toggle)
+    {
+        // Set target object's active status to match toggle value
+        if(toggle.isOn)
+        {
+            Text label = toggle.GetComponentInChildren<Text>();
+            string textValue = label.text;
+            if(string.Equals(textValue,"Chaos Rule"))
+            {
+                StartChaosZone = true;
+            }
+            else if(string.Equals(textValue,"UniProduction Rule"))
+            {
+                uniRule = true;
+            }
+            else if(string.Equals(textValue,"Birth Rule"))
+            {
+                randomBirthsRule = true;
+            }
+        }
+        else
+        {
+            Text label = toggle.GetComponentInChildren<Text>();
+            string textValue = label.text;
+            if(string.Equals(textValue,"Chaos Rule"))
+            {
+                StartChaosZone = false;
+            }
+            else if(string.Equals(textValue,"UniProduction Rule"))
+            {
+                uniRule = false;
+            }
+            else if(string.Equals(textValue,"Birth Rule"))
+            {
+                randomBirthsRule = false;
+            }
+        }
+    }
+
+    void OnButtonClickStart()
+    {
+        Text label = startButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Start"))
+        {
+            StartSimulation = true;
+        }
+    }
+
+    void OnButtonClickStop()
+    {
+        Text label = stopButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Stop"))
+        {
+            StartSimulation = false;
+        }
+    }
+
+    void OnButtonClickClear()
+    {
+        Text label = clearButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Clear"))
+        {
+            ClearGrid();
+        }
+    }
+
+    void OnButtonClickRandom()
+    {
+        Text label = randomButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Random"))
+        {
+            ClearGrid();
+            RandomConfiguration();
+        }
+    }
+
+    void OnButtonClickReflector()
+    {
+        Text label = reflectorButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Reflector"))
+        {
+            ClearGrid();
+            Reflector();
+        }
+    }
+
+    void OnButtonClickGun()
+    {
+        Text label = gunButton.GetComponentInChildren<Text>();
+        string textValue = label.text;
+        if(string.Equals(textValue,"Glider Gun"))
+        {
+            ClearGrid();
+            GliderGun();
+        }
+    }
+
+    void OnEndEdit(string text)
+    {
+        int value = int.Parse(text); 
+        numGenerations = value;
+    }
+
 
     void RandomConfiguration()
     {
@@ -342,7 +512,7 @@ public class Game : MonoBehaviour
         }   
     }
 
-        Cell RandomNeighbour(int x, int y)
+    Cell RandomNeighbour(int x, int y)
     {
         int xoffset = 0;
         int yoffset = 0;
@@ -357,8 +527,6 @@ public class Game : MonoBehaviour
             Cell cell = grid[x+xoffset,y+yoffset];
              return cell;
         }
-        
-       
     }
 
     void UniReproduction() 
@@ -368,9 +536,6 @@ public class Game : MonoBehaviour
             for (int x = 0; x < SCREEN_WIDTH; x++)
             {           
                 Cell cell = grid[x, y];
-
-                
-
                 
                 if (cell.isAlive && (cell.numNeighbours == 0))
                 {
