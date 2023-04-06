@@ -32,7 +32,7 @@ public class Game : MonoBehaviour
     Canvas mainMenuCanvas;
     InputField numGen;
     Slider speedSlider, chaosSlider, birthSlider;
-    Text speedText, chaosText, birthText;
+    Text speedText, chaosText, birthText, generationText;
     Toggle toggle, uniToggle, birthToggle;
     Button startButton, stopButton, clearButton;
     Button randomButton, reflectorButton, gunButton;
@@ -46,6 +46,9 @@ public class Game : MonoBehaviour
     {
         PlaceCells();
         mainMenuCanvas = GameObject.Find("MainMenu").GetComponent<Canvas>();
+
+        //Nr of Generation Text
+        generationText = GameObject.Find("TextGen").GetComponent<Text>();
 
         //Sliders
         speedSlider = GameObject.Find("Slider").GetComponent<Slider>();
@@ -90,9 +93,11 @@ public class Game : MonoBehaviour
         birthToggle.onValueChanged.AddListener(delegate {
             ToggleValueChanged(birthToggle);
         });
+
+        generationText.text = "Generation: " + numGenerations.ToString();
         speedText.text = "Speed: "+ speedSlider.value.ToString("F2");
-        chaosText.text = "Probability: "+ chaosSlider.value.ToString("F2");
-        birthText.text = "Probability: "+ birthSlider.value.ToString("F2");
+        chaosText.text = "Chaos Probability: "+ chaosSlider.value.ToString("F2");
+        birthText.text = "Birth Probability: "+ birthSlider.value.ToString("F2");
         mainMenuCanvas.gameObject.SetActive(false);
     }
 
@@ -136,8 +141,9 @@ public class Game : MonoBehaviour
         chaosProbability = chaosSlider.value;
         birthProbability = birthSlider.value;
         speedText.text = "Speed: "+ speedSlider.value.ToString("F2");
-        chaosText.text = "Probability: "+ chaosSlider.value.ToString("F2");
-        birthText.text = "Probability: "+ birthSlider.value.ToString("F2");
+        chaosText.text = "Chaos Probability: "+ chaosSlider.value.ToString("F2");
+        birthText.text = "Birth Probability: "+ birthSlider.value.ToString("F2");
+        generationText.text = "Generation: " + numGenerations.ToString();
     }
 
     void UserInput()
@@ -342,7 +348,7 @@ public class Game : MonoBehaviour
 
     void ChaosZone() 
     {
-        float prob = chaosProbability / 200;
+        float prob = chaosProbability / 100;
         for (int y = 0; y < SCREEN_HEIGHT; y++)
         {
             for (int x = 0; x < SCREEN_WIDTH; x++)
@@ -394,7 +400,7 @@ public class Game : MonoBehaviour
         {
             Text label = toggle.GetComponentInChildren<Text>();
             string textValue = label.text;
-            if(string.Equals(textValue,"Chaos Rule"))
+            if(string.Equals(textValue,"Chaos Zone"))
             {
                 StartChaosZone = true;
             }
@@ -411,7 +417,7 @@ public class Game : MonoBehaviour
         {
             Text label = toggle.GetComponentInChildren<Text>();
             string textValue = label.text;
-            if(string.Equals(textValue,"Chaos Rule"))
+            if(string.Equals(textValue,"Chaos Zone"))
             {
                 StartChaosZone = false;
             }
